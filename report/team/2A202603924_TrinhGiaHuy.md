@@ -157,11 +157,11 @@ Kết quả với v5: **10/10** (`runs/v5_B_group_gemini_20261111T113347358950.j
 
 ## 5. Tự đánh giá
 
-<!-- Phần này cần tự viết bằng lời của bạn (RULES.md: không dùng AI để viết phần tự đánh giá). Gợi ý câu hỏi:
-- Điều gì mình hiểu rõ nhất sau lab (ví dụ: vì sao mô tả tool trong tools.yaml lại quyết định routing)?
-- Phần nào mình làm tốt, phần nào chưa (ví dụ: nhãn version bị lẫn, Twitter chưa subscribe, eval group chưa phân biệt được v4/v5)?
-- Nếu làm lại, mình sẽ đổi gì trong quy trình (một giả thuyết mỗi version, kiểm tra hash trước khi chạy)?
-- Tự chấm mức đóng góp so với vai trò AI Engineer.
--->
+
+- Đã hiểu tốt phần tool calling
+- Làm tốt phần triển khai pipeline và các phần AI backend?
+- Đổi quy trình nếu phát tiển cần đi tìm rule tools trước?
+- Hoàn thành vai trò ai engineer, phát triển, đóng gói triển khai ai service.
+
 
 ...
