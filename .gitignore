@@ -22,3 +22,5 @@ arxiv_papers/
 Thumbs.db
 .idea/
 .vscode/
+starter_v0/artifacts/system_prompt.md
+starter_v0/data/eval_group.json
