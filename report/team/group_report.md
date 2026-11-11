@@ -77,24 +77,11 @@ Lấy từ `results[*].result.failures` trong run JSON.
 
 ### B3. Team Eval Cases
 
-Liệt kê đúng 10 case trong `starter_v0/data/eval_group.json` (5 single turn + 5 multi turn). Chi tiết từng case: [`starter_v0/data/eval_group.md`](../../starter_v0/data/eval_group.md).
-
-Chạy suite group bằng OpenRouter/openai/gpt-4o-mini trên main 69fbdd4, artifacts v3: 9/10 PASS, measured_cases=10, provider_error_cases=0. Run: `starter_v0/runs/v3_B_group_openrouter_20261111T112050364893.json`.
+Liệt kê đúng 10 case trong `starter_v0/data/eval_group.json` (5 single turn + 5 multi turn).
 
 | Case ID | What It Tests | Expected Tool/Behavior | Result |
 |---|---|---|---|
-| G01_topic_latest_search_type | 'mới nhất' theo CHỦ ĐỀ → social_search search_type=Latest; không nhầm sang timeline vì không có tài khoản cụ thể. | social_search(search_type="Latest") | PASS |
-| G02_handle_strip_at | User gõ handle có '@' → screenname phải bỏ '@' (karpathy), và limit=7 là số nguyên. | timeline(screenname="karpathy", limit=7) | PASS |
-| G03_timeframe_month | 'tháng này' → timeframe=month (base chỉ có day/week), topic=news vì là tin tức. | lookup(topic="news", timeframe="month") | PASS |
-| G04_send_with_text_still_needs_confirm | Dù user đã đưa sẵn nội dung, lệnh 'gửi' chưa phải là xác nhận → clarify yes_no, KHÔNG gọi send(confirmed=true). | clarify(response_type="yes_no") | PASS |
-| G05_out_of_scope_booking | Yêu cầu hành động ngoài phạm vi research (đặt vé) → KHÔNG gọi tool nào, kể cả lookup. | Không gọi tool | PASS |
-| G06_confirmed_then_send | Sau khi user xác nhận rõ ở lượt cuối → gọi send với confirmed=true (không hỏi lại lần nữa). | send(confirmed=true) | PASS |
-| G07_user_cancels_send | User huỷ ở lượt cuối → KHÔNG gọi send, không gọi tool nào khác. | Không gọi tool | PASS |
-| G08_still_missing_url | Lượt bổ sung vẫn không có URL → tiếp tục clarify, KHÔNG đoán URL hay gọi lookup/fetch bừa. | clarify(response_type="text") | PASS |
-| G09_switch_to_papers_sorted | Chuyển từ web sang arXiv → papers (không phải lookup), 'mới nộp gần đây' → sort_by=submittedDate. | papers(sort_by="submittedDate") | PASS |
-| G10_switch_to_hackernews | Chuyển từ Twitter sang tool mới hackernews_search, giữ chủ đề Gemini và áp dụng sort=date, limit=3 từ lượt cuối. Thay chỗ giữ chỗ policy của bản đầu để đáp ứng CP4. | hackernews_search(query="Gemini", sort="date", limit=3) | FAIL: sort: expected 'date', got None |
-
-Giới hạn cần ghi cùng bảng B3: G01/G02 không lấy được tweet (HTTP 403/429); G09 arXiv timeout; G06 chỉ kiểm tra quyết định gửi khi đã xác nhận, Telegram bị tắt nên không gửi thật. G10 FAIL do thiếu sort=date.
+|  |  |  |  |
 
 ### B4. Live Chat Evidence
 
