@@ -1,159 +1,291 @@
 {
   "dataset_id": "day03_v2_research_group",
   "dataset_role": "group",
-  "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp. Mỗi case cần: id, phase='B', query HOẶC turns, failure_type (thuộc allowed_failure_types), và expect (tool_calls[...] hoặc no_tool=true). Nên kèm metadata.what_it_tests. Bộ này tập trung vào 2 tool mới của nhóm: hackernews_search và github_search (routing, args, phân biệt với tool cũ, multi-turn, boundary).",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
+  "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp. Mỗi case cần: id, phase='B', query HOẶC turns, failure_type (thuộc allowed_failure_types), và expect (tool_calls[...] hoặc no_tool=true). Nên kèm metadata.what_it_tests.",
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
   "cases": [
     {
-      "id": "G01_hn_topic_routing",
+      "id": "G01_topic_latest_search_type",
       "phase": "B",
       "suite": "group",
-      "query": "Trên Hacker News dân dev đang bàn gì về LLM?",
-      "failure_type": "wrong_tool",
-      "expect": {"tool_calls": [{"name": "hackernews_search", "args": {"query": "LLM"}}]},
+      "query": "Trên Twitter, các bài mới nhất về Claude 5 đang nói gì?",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "search_type": "Latest"
+            }
+          }
+        ]
+      },
       "metadata": {
-        "skill": "routing_hackernews",
+        "skill": "arg_search_type_latest",
+        "difficulty": "medium",
+        "what_it_tests": "'mới nhất' theo CHỦ ĐỀ → social_search search_type=Latest; không nhầm sang timeline vì không có tài khoản cụ thể."
+      }
+    },
+    {
+      "id": "G02_handle_strip_at",
+      "phase": "B",
+      "suite": "group",
+      "query": "Xem 7 bài đăng gần đây của @karpathy",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "karpathy",
+              "limit": 7
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "arg_handle_without_at",
         "difficulty": "easy",
-        "what_it_tests": "Nhắc tới Hacker News / dân dev bàn luận → hackernews_search (không phải lookup hay social_search), query chỉ giữ từ khóa 'LLM'."
+        "what_it_tests": "User gõ handle có '@' → screenname phải bỏ '@' (karpathy), và limit=7 là số nguyên."
       }
     },
     {
-      "id": "G02_hn_show_hn_latest_args",
+      "id": "G03_timeframe_month",
       "phase": "B",
       "suite": "group",
-      "query": "Cho mình 3 bài Show HN mới nhất về Rust",
+      "query": "Có tin tức gì về Nvidia trong tháng này không?",
       "failure_type": "wrong_arg_value",
-      "expect": {"tool_calls": [{"name": "hackernews_search", "args": {"query": "Rust", "tags": "show_hn", "sort": "date", "limit": 3}}]},
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "month"
+            }
+          }
+        ]
+      },
       "metadata": {
-        "skill": "arg_hackernews_tags_sort",
+        "skill": "arg_timeframe_month",
         "difficulty": "medium",
-        "what_it_tests": "'Show HN' → tags=show_hn, 'mới nhất' → sort=date, '3 bài' → limit=3, query='Rust'."
+        "what_it_tests": "'tháng này' → timeframe=month (base chỉ có day/week), topic=news vì là tin tức."
       }
     },
     {
-      "id": "G03_github_language_stars_args",
+      "id": "G04_send_with_text_still_needs_confirm",
       "phase": "B",
       "suite": "group",
-      "query": "Tìm 3 repo GitHub về RAG viết bằng Python nhiều sao nhất",
-      "failure_type": "wrong_arg_value",
-      "expect": {"tool_calls": [{"name": "github_search", "args": {"query": "RAG", "language": "python", "sort": "stars", "limit": 3}}]},
+      "query": "Gửi lên Telegram câu này: 'OpenAI vừa công bố GPT-6, mạnh gấp 10 lần GPT-5'",
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
       "metadata": {
-        "skill": "arg_github_language_sort",
-        "difficulty": "medium",
-        "what_it_tests": "Repo GitHub → github_search; ngôn ngữ đưa vào language='python' (không nhét vào query), 'nhiều sao nhất' → sort=stars, limit=3."
-      }
-    },
-    {
-      "id": "G04_parallel_github_and_hn",
-      "phase": "B",
-      "suite": "group",
-      "query": "Tìm repo GitHub về agentic AI và xem trên Hacker News người ta bàn gì về agentic AI",
-      "failure_type": "wrong_tool",
-      "expect": {"tool_calls": [
-        {"name": "github_search", "args": {"query": "agentic AI"}},
-        {"name": "hackernews_search", "args": {"query": "agentic AI"}}
-      ]},
-      "metadata": {
-        "skill": "parallel_github_plus_hn",
+        "skill": "confirm_before_send_with_text",
         "difficulty": "hard",
-        "what_it_tests": "Một request cần 2 nguồn mới → gọi cả github_search và hackernews_search trong cùng một lượt; eval không phụ thuộc thứ tự."
+        "what_it_tests": "Dù user đã đưa sẵn nội dung, lệnh 'gửi' chưa phải là xác nhận → clarify yes_no, KHÔNG gọi send(confirmed=true)."
       }
     },
     {
-      "id": "G05_write_code_out_of_scope",
+      "id": "G05_out_of_scope_booking",
       "phase": "B",
       "suite": "group",
-      "query": "Viết giúp mình code một agent bằng LangChain để đẩy lên GitHub",
+      "query": "Đặt giúp mình vé máy bay Hà Nội đi Sài Gòn tối nay nhé",
       "failure_type": "out_of_scope",
-      "expect": {"no_tool": true, "behavior": "refuse"},
+      "expect": {
+        "no_tool": true,
+        "behavior": "refuse"
+      },
       "metadata": {
-        "skill": "out_of_scope_code_vs_github",
-        "difficulty": "medium",
-        "what_it_tests": "Có chữ 'GitHub' nhưng yêu cầu là VIẾT CODE → ngoài phạm vi, KHÔNG gọi github_search hay tool nào khác."
+        "skill": "out_of_scope_booking",
+        "difficulty": "easy",
+        "what_it_tests": "Yêu cầu hành động ngoài phạm vi research (đặt vé) → KHÔNG gọi tool nào, kể cả lookup."
       }
     },
     {
-      "id": "GM01_switch_web_to_hn",
+      "id": "G06_confirmed_then_send",
       "phase": "B",
       "suite": "group",
       "turns": [
-        {"role": "user", "content": "Tin AI hôm nay có gì?"},
-        {"role": "user", "content": "Bỏ web đi, xem trên Hacker News người ta đang bàn gì"},
-        {"role": "user", "content": "Vẫn chủ đề AI nhé"}
+        {
+          "role": "user",
+          "content": "Đăng lên Telegram: 'Bản tin AI 11/11: Anthropic ra mắt Claude 5'"
+        },
+        {
+          "role": "assistant",
+          "content": "Bạn xác nhận gửi nguyên văn nội dung trên lên Telegram channel của nhóm chứ?"
+        },
+        {
+          "role": "user",
+          "content": "Có, mình xác nhận, gửi đi"
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "confirmed": true
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "send_after_confirmation",
+        "difficulty": "hard",
+        "what_it_tests": "Sau khi user xác nhận rõ ở lượt cuối → gọi send với confirmed=true (không hỏi lại lần nữa)."
+      }
+    },
+    {
+      "id": "G07_user_cancels_send",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Đăng bản tin AI hôm nay lên Telegram giúp mình"
+        },
+        {
+          "role": "assistant",
+          "content": "Bạn xác nhận gửi bản tin lên Telegram chứ?"
+        },
+        {
+          "role": "user",
+          "content": "Khoan, đừng gửi, để mình sửa lại nội dung đã"
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "no_tool": true,
+        "behavior": "acknowledge_cancel"
+      },
+      "metadata": {
+        "skill": "respect_cancel",
+        "difficulty": "medium",
+        "what_it_tests": "User huỷ ở lượt cuối → KHÔNG gọi send, không gọi tool nào khác."
+      }
+    },
+    {
+      "id": "G08_still_missing_url",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Đọc giúp mình bài báo này"
+        },
+        {
+          "role": "assistant",
+          "content": "Bạn gửi giúp mình link bài báo nhé?"
+        },
+        {
+          "role": "user",
+          "content": "Bài mình gửi hôm qua đó, bạn tự tìm đi"
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "clarify_still_missing",
+        "difficulty": "hard",
+        "what_it_tests": "Lượt bổ sung vẫn không có URL → tiếp tục clarify, KHÔNG đoán URL hay gọi lookup/fetch bừa."
+      }
+    },
+    {
+      "id": "G09_switch_to_papers_sorted",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tìm trên web thông tin về retrieval augmented generation"
+        },
+        {
+          "role": "user",
+          "content": "Thôi, mình cần paper arXiv cơ"
+        },
+        {
+          "role": "user",
+          "content": "Lấy những paper mới nộp gần đây nhất"
+        }
       ],
       "failure_type": "wrong_tool",
-      "expect": {"tool_calls": [{"name": "hackernews_search", "args": {"query": "AI"}}]},
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "papers",
+            "args": {
+              "sort_by": "submittedDate"
+            }
+          }
+        ]
+      },
       "metadata": {
-        "skill": "multiturn_switch_lookup_to_hn",
+        "skill": "multiturn_switch_to_papers",
         "difficulty": "hard",
-        "what_it_tests": "3 turns: user bỏ web search, chuyển sang Hacker News, giữ chủ đề AI → hackernews_search query='AI', không gọi lookup."
+        "what_it_tests": "Chuyển từ web sang arXiv → papers (không phải lookup), 'mới nộp gần đây' → sort_by=submittedDate."
       }
     },
     {
-      "id": "GM02_github_correction_language_limit",
+      "id": "G10_switch_to_hackernews",
       "phase": "B",
       "suite": "group",
       "turns": [
-        {"role": "user", "content": "Tìm repo GitHub về vector database nhiều sao nhất"},
-        {"role": "user", "content": "À, chỉ lấy repo viết bằng Rust thôi"},
-        {"role": "user", "content": "Lấy 3 repo thôi"}
-      ],
-      "failure_type": "wrong_arg_value",
-      "expect": {"tool_calls": [{"name": "github_search", "args": {"query": "vector database", "language": "rust", "limit": 3}}]},
-      "metadata": {
-        "skill": "multiturn_github_arg_carryover",
-        "difficulty": "hard",
-        "what_it_tests": "3 turns: giữ query 'vector database' từ lượt 1, thêm language='rust' từ lượt 2, limit=3 từ lượt 3."
-      }
-    },
-    {
-      "id": "GM03_github_sort_updated",
-      "phase": "B",
-      "suite": "group",
-      "turns": [
-        {"role": "user", "content": "Tìm repo GitHub về MCP server"},
-        {"role": "user", "content": "Sắp xếp theo repo mới cập nhật gần đây nhất"},
-        {"role": "user", "content": "Lấy 5 repo"}
-      ],
-      "failure_type": "wrong_arg_value",
-      "expect": {"tool_calls": [{"name": "github_search", "args": {"query": "MCP server", "sort": "updated", "limit": 5}}]},
-      "metadata": {
-        "skill": "multiturn_github_sort_updated",
-        "difficulty": "medium",
-        "what_it_tests": "3 turns: 'mới cập nhật gần đây' → sort=updated (không phải stars), giữ query 'MCP server', limit=5."
-      }
-    },
-    {
-      "id": "GM04_switch_github_to_hn_keep_topic",
-      "phase": "B",
-      "suite": "group",
-      "turns": [
-        {"role": "user", "content": "Tìm repo GitHub về agentic AI"},
-        {"role": "user", "content": "Thôi, mình muốn xem dân dev trên Hacker News bàn gì về nó"},
-        {"role": "user", "content": "Giữ chủ đề agentic AI"}
+        {
+          "role": "user",
+          "content": "Tìm tweet về Gemini"
+        },
+        {
+          "role": "user",
+          "content": "Khoan, chuyển sang xem thảo luận trên Hacker News thay vì Twitter."
+        },
+        {
+          "role": "user",
+          "content": "Giữ chủ đề Gemini, lấy 3 bài mới nhất."
+        }
       ],
       "failure_type": "wrong_tool",
-      "expect": {"tool_calls": [{"name": "hackernews_search", "args": {"query": "agentic AI"}}]},
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "hackernews_search",
+            "args": {
+              "query": "Gemini",
+              "sort": "date",
+              "limit": 3
+            }
+          }
+        ]
+      },
       "metadata": {
-        "skill": "multiturn_switch_github_to_hn",
-        "difficulty": "hard",
-        "what_it_tests": "3 turns: chuyển từ github_search sang hackernews_search, giữ chủ đề 'agentic AI' (đại từ 'nó' trỏ về lượt 1)."
-      }
-    },
-    {
-      "id": "GM05_hn_rust_refine",
-      "phase": "B",
-      "suite": "group",
-      "turns": [
-        {"role": "user", "content": "Tìm tin mới về Rust"},
-        {"role": "user", "content": "Mình muốn 3 bài mới nhất trên Hacker News"}
-      ],
-      "failure_type": "wrong_arg_value",
-      "expect": {"tool_calls": [{"name": "hackernews_search", "args": {"query": "Rust", "sort": "date", "limit": 3}}]},
-      "metadata": {
-        "skill": "multiturn_hn_refine_source_and_limit",
+        "skill": "multiturn_switch_to_new_tool",
         "difficulty": "medium",
-        "what_it_tests": "2 turns: lượt đầu nêu chủ đề 'Rust', lượt sau chỉ rõ nguồn Hacker News + giới hạn 3 bài mới nhất → hackernews_search query='Rust', sort='date', limit=3. Kiểm tra khả năng giữ topic qua turn và áp dụng đúng args khi user tinh chỉnh nguồn."
+        "what_it_tests": "Chuyển từ Twitter sang tool mới hackernews_search, giữ chủ đề Gemini và áp dụng sort=date, limit=3 từ lượt cuối. Thay chỗ giữ chỗ policy của bản đầu để đáp ứng CP4."
       }
     }
   ]
